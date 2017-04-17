@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SizeF;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -172,6 +173,11 @@ class Camera2 extends CameraImpl {
 
     @Override
     void endVideo() {
+
+    }
+
+    @Override
+    void setVideoOutputFile(File outputFile) {
 
     }
 
