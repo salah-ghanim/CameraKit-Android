@@ -491,7 +491,7 @@ public class Camera1 extends CameraImpl {
         }
 
         mMediaRecorder.setOutputFile(mVideoFile.getAbsolutePath());
-        mMediaRecorder.setOrientationHint(calculatePreviewRotation());
+        mMediaRecorder.setOrientationHint(calculateCaptureRotation());
         mMediaRecorder.setVideoSize(mCaptureSize.getWidth(), mCaptureSize.getHeight());
     }
 
