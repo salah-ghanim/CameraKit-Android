@@ -385,8 +385,16 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         mCameraImpl.setVideoOutputFile(outputFile);
     }
 
-    void setAudioInputEnabled(boolean enabled) {
+    public void setAudioInputEnabled(boolean enabled) {
         mCameraImpl.setAudioInputEnabled(enabled);
+    }
+
+    public void setVideoMaxDuration(int duration){
+        mCameraImpl.setVideoMaxDuration(duration);
+    }
+
+    public int getVideoMaxDuration(){
+        return mCameraImpl.getVideoMaxDuration();
     }
 
     public boolean isAudioInputEnabled(){
