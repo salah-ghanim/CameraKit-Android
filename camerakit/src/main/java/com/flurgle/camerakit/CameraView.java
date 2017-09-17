@@ -276,14 +276,14 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         switch (mPermissions) {
             case PERMISSIONS_STRICT:
                 if (cameraCheck != PackageManager.PERMISSION_GRANTED || audioCheck != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(true, true);
+                    requestPermissions(true,  mCameraImpl.isAudioInputEnabled());
                     return;
                 }
                 break;
 
             case PERMISSIONS_LAZY:
                 if (cameraCheck != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(true, true);
+                    requestPermissions(true, mCameraImpl.isAudioInputEnabled());
                     return;
                 }
                 break;
@@ -383,6 +383,14 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
 
     public void setVideoOutputFile(File outputFile) {
         mCameraImpl.setVideoOutputFile(outputFile);
+    }
+
+    void setAudioInputEnabled(boolean enabled) {
+        mCameraImpl.setAudioInputEnabled(enabled);
+    }
+
+    public boolean isAudioInputEnabled(){
+        return mCameraImpl.isAudioInputEnabled()
     }
 
     @Facing

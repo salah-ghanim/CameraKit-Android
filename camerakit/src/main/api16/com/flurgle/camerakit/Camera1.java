@@ -70,6 +70,8 @@ public class Camera1 extends CameraImpl {
     @VideoQuality
     private int mVideoQuality;
 
+    private boolean mAudioEnabled = true;
+
     private Handler mHandler = new Handler();
 
     Camera1(CameraListener callback, PreviewImpl preview) {
@@ -214,6 +216,16 @@ public class Camera1 extends CameraImpl {
     @Override
     void setVideoOutputFile(File outputFile) {
         mVideoFile = outputFile;
+    }
+
+    @Override
+    void setAudioInputEnabled(boolean enabled){
+        mAudioEnabled = enabled;
+    }
+
+    @Override
+    boolean isAudioInputEnabled(){
+        return mAudioEnabled;
     }
 
     @Override
@@ -482,7 +494,10 @@ public class Camera1 extends CameraImpl {
         mMediaRecorder.setCamera(mCamera);
 
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+
+        if (mAudioEnabled) {
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+        }
 
         mMediaRecorder.setProfile(getCamcorderProfile(mVideoQuality));
 

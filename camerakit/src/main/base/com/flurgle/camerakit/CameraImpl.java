@@ -28,6 +28,7 @@ abstract class CameraImpl {
     abstract void setZoom(@Zoom int zoom);
     abstract void setVideoQuality(@VideoQuality int videoQuality);
     abstract void setVideoOutputFile(File outputFile);
+    abstract void setAudioInputEnabled(boolean enabled);
 
     abstract void captureImage();
     abstract void startVideo();
@@ -36,6 +37,7 @@ abstract class CameraImpl {
     abstract Size getCaptureResolution();
     abstract Size getPreviewResolution();
     abstract boolean isCameraOpened();
+    abstract boolean isAudioInputEnabled();
 
     @Nullable
     abstract CameraProperties getCameraProperties();

@@ -182,6 +182,16 @@ class Camera2 extends CameraImpl {
     }
 
     @Override
+    void setAudioInputEnabled(boolean enabled){
+
+    }
+
+    @Override
+    boolean isAudioInputEnabled(){
+        return true;
+    }
+
+    @Override
     Size getCaptureResolution() {
         if (mCaptureSize == null && mCameraCharacteristics != null) {
             TreeSet<Size> sizes = new TreeSet<>();
