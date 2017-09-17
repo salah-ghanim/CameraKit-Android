@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.MediaRecorder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SizeF;
@@ -189,6 +190,16 @@ class Camera2 extends CameraImpl {
     @Override
     boolean isAudioInputEnabled(){
         return true;
+    }
+
+    @Override
+    void setVideoMaxDuration(int duration) {
+
+    }
+
+    @Override
+    int getVideoMaxDuration() {
+        return -1;
     }
 
     @Override

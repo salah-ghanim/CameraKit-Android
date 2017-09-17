@@ -38,6 +38,8 @@ abstract class CameraImpl {
     abstract Size getPreviewResolution();
     abstract boolean isCameraOpened();
     abstract boolean isAudioInputEnabled();
+    abstract void setVideoMaxDuration(int duration);
+    abstract int getVideoMaxDuration();
 
     @Nullable
     abstract CameraProperties getCameraProperties();

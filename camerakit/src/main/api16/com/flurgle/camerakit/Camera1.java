@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -71,6 +70,8 @@ public class Camera1 extends CameraImpl {
     private int mVideoQuality;
 
     private boolean mAudioEnabled = true;
+
+    private int mMaxDuration = -1;
 
     private Handler mHandler = new Handler();
 
@@ -221,6 +222,16 @@ public class Camera1 extends CameraImpl {
     @Override
     void setAudioInputEnabled(boolean enabled){
         mAudioEnabled = enabled;
+    }
+
+    @Override
+    public void setVideoMaxDuration(int duration){
+        mMaxDuration = duration;
+    }
+
+    @Override
+    public int getVideoMaxDuration(){
+        return mMaxDuration;
     }
 
     @Override
@@ -508,6 +519,17 @@ public class Camera1 extends CameraImpl {
         mMediaRecorder.setOutputFile(mVideoFile.getAbsolutePath());
         mMediaRecorder.setOrientationHint(calculateCaptureRotation());
         mMediaRecorder.setVideoSize(mCaptureSize.getWidth(), mCaptureSize.getHeight());
+        if (mMaxDuration > 0){
+            mMediaRecorder.setMaxDuration(mMaxDuration);
+            mMediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+                @Override
+                public void onInfo(MediaRecorder mediaRecorder, int what, int extra) {
+                    if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
+                        endVideo();
+                    }
+                }
+            });
+        }
     }
 
     private void prepareMediaRecorder() {
