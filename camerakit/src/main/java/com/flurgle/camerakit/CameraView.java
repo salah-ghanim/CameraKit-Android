@@ -390,7 +390,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
     }
 
     public boolean isAudioInputEnabled(){
-        return mCameraImpl.isAudioInputEnabled()
+        return mCameraImpl.isAudioInputEnabled();
     }
 
     @Facing
