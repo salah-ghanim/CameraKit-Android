@@ -295,13 +295,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
                 }
                 break;
         }
-
-        sWorkerHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mCameraImpl.start();
-            }
-        });
+        mCameraImpl.start();
     }
 
     public void stop() {
