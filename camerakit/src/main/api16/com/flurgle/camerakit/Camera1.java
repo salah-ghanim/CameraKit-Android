@@ -510,7 +510,7 @@ public class Camera1 extends CameraImpl {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         }
 
-        mMediaRecorder.setProfile(getCamcorderProfile(mVideoQuality));
+        setMediaRecorderProfile(getCamcorderProfile(mVideoQuality));
 
         if(mVideoFile == null) {
             mVideoFile = new File(mPreview.getView().getContext().getExternalFilesDir(null), "video.mp4");
@@ -529,6 +529,35 @@ public class Camera1 extends CameraImpl {
                     }
                 }
             });
+        }
+    }
+
+    /** source: http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/5.1.1_r1/android/media/MediaRecorder.java/?v=source
+     * Uses the settings from a CamcorderProfile object for recording. This method should
+     * be called after the video AND audio sources are set, and before setOutputFile().
+     * If a time lapse CamcorderProfile is used, audio related source or recording
+     * parameters are ignored.
+     *
+     * @param profile the CamcorderProfile to use
+     * @see android.media.CamcorderProfile
+     */
+    private void setMediaRecorderProfile(CamcorderProfile profile) {
+        mMediaRecorder.setOutputFormat(profile.fileFormat);
+        mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
+        mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
+        mMediaRecorder.setVideoEncoder(profile.videoCodec);
+        if (profile.quality >= CamcorderProfile.QUALITY_TIME_LAPSE_LOW &&
+                profile.quality <= CamcorderProfile.QUALITY_TIME_LAPSE_QVGA) {
+            // Nothing needs to be done. Call to setCaptureRate() enables
+            // time lapse video recording.
+        } else {
+            if (mAudioEnabled) {
+                mMediaRecorder.setAudioEncodingBitRate(profile.audioBitRate);
+                mMediaRecorder.setAudioChannels(profile.audioChannels);
+                mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
+                mMediaRecorder.setAudioEncoder(profile.audioCodec);
+            }
         }
     }
 
