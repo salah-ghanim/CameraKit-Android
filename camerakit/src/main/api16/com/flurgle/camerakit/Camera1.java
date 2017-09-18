@@ -292,10 +292,17 @@ public class Camera1 extends CameraImpl {
 
     @Override
     void endVideo() {
-        mMediaRecorder.stop();
+        File outFile = mVideoFile;
+        try {
+            mMediaRecorder.stop();
+        } catch (RuntimeException stopException){
+            mVideoFile.delete();
+            outFile = null;
+        }
+        mCamera.lock();
         mMediaRecorder.release();
         mMediaRecorder = null;
-        mCameraListener.onVideoTaken(mVideoFile);
+        mCameraListener.onVideoTaken(outFile);
     }
 
     // Code from SandriosCamera library
