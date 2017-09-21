@@ -7,11 +7,14 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
+import android.support.v4.util.SparseArrayCompat;
 import android.util.Log;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
+
+import com.flurgle.camerakit.CameraKit.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +39,16 @@ public class Camera1 extends CameraImpl {
     private static final int FOCUS_AREA_SIZE_DEFAULT = 300;
     private static final int FOCUS_METERING_AREA_WEIGHT_DEFAULT = 1000;
     private static final int DELAY_MILLIS_BEFORE_RESETTING_FOCUS = 3000;
+
+    private static final SparseArrayCompat<String> FLASH_MODES = new SparseArrayCompat<>();
+
+    static {
+        FLASH_MODES.put(Constants.FLASH_OFF, Camera.Parameters.FLASH_MODE_OFF);
+        FLASH_MODES.put(Constants.FLASH_ON, Camera.Parameters.FLASH_MODE_ON);
+        FLASH_MODES.put(Constants.FLASH_TORCH, Camera.Parameters.FLASH_MODE_TORCH);
+        FLASH_MODES.put(Constants.FLASH_AUTO, Camera.Parameters.FLASH_MODE_AUTO);
+    }
+
 
     private int mCameraId;
     private Camera mCamera;
@@ -135,25 +148,18 @@ public class Camera1 extends CameraImpl {
         }
     }
 
+
     @Override
     void setFlash(@Flash int flash) {
-        if (mCameraParameters != null) {
-            List<String> flashes = mCameraParameters.getSupportedFlashModes();
-            String internalFlash = new ConstantMapper.Flash(flash).map();
-            if (flashes != null && flashes.contains(internalFlash)) {
-                mCameraParameters.setFlashMode(internalFlash);
-                mFlash = flash;
-            } else {
-                String currentFlash = new ConstantMapper.Flash(mFlash).map();
-                if (flashes == null || !flashes.contains(currentFlash)) {
-                    mCameraParameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                    mFlash = FLASH_OFF;
-                }
+        if (flash == mFlash) {
+            return;
+        }
+        try {
+            if (setFlashInternal(flash)) {
+                mCamera.setParameters(mCameraParameters);
             }
-
-            mCamera.setParameters(mCameraParameters);
-        } else {
-            mFlash = flash;
+        } catch (Exception ex){
+            ex.printStackTrace();
         }
     }
 
@@ -581,51 +587,51 @@ public class Camera1 extends CameraImpl {
     private CamcorderProfile getCamcorderProfile(@VideoQuality int videoQuality) {
         CamcorderProfile camcorderProfile = null;
         switch (videoQuality) {
-            case CameraKit.Constants.VIDEO_QUALITY_QVGA:
+            case Constants.VIDEO_QUALITY_QVGA:
                 if (CamcorderProfile.hasProfile(mCameraId, CamcorderProfile.QUALITY_QVGA)) {
                     camcorderProfile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_QVGA);
                 } else {
-                    return getCamcorderProfile(CameraKit.Constants.VIDEO_QUALITY_LOWEST);
+                    return getCamcorderProfile(Constants.VIDEO_QUALITY_LOWEST);
                 }
                 break;
 
-            case CameraKit.Constants.VIDEO_QUALITY_480P:
+            case Constants.VIDEO_QUALITY_480P:
                 if (CamcorderProfile.hasProfile(mCameraId, CamcorderProfile.QUALITY_480P)) {
                     camcorderProfile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_480P);
                 } else {
-                    return getCamcorderProfile(CameraKit.Constants.VIDEO_QUALITY_QVGA);
+                    return getCamcorderProfile(Constants.VIDEO_QUALITY_QVGA);
                 }
                 break;
 
-            case CameraKit.Constants.VIDEO_QUALITY_720P:
+            case Constants.VIDEO_QUALITY_720P:
                 if (CamcorderProfile.hasProfile(mCameraId, CamcorderProfile.QUALITY_720P)) {
                     camcorderProfile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_720P);
                 } else {
-                    return getCamcorderProfile(CameraKit.Constants.VIDEO_QUALITY_480P);
+                    return getCamcorderProfile(Constants.VIDEO_QUALITY_480P);
                 }
                 break;
 
-            case CameraKit.Constants.VIDEO_QUALITY_1080P:
+            case Constants.VIDEO_QUALITY_1080P:
                 if (CamcorderProfile.hasProfile(mCameraId, CamcorderProfile.QUALITY_1080P)) {
                     camcorderProfile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_1080P);
                 } else {
-                    return getCamcorderProfile(CameraKit.Constants.VIDEO_QUALITY_720P);
+                    return getCamcorderProfile(Constants.VIDEO_QUALITY_720P);
                 }
                 break;
 
-            case CameraKit.Constants.VIDEO_QUALITY_2160P:
+            case Constants.VIDEO_QUALITY_2160P:
                 try {
                     camcorderProfile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_2160P);
                 } catch (Exception e) {
-                    return getCamcorderProfile(CameraKit.Constants.VIDEO_QUALITY_HIGHEST);
+                    return getCamcorderProfile(Constants.VIDEO_QUALITY_HIGHEST);
                 }
                 break;
 
-            case CameraKit.Constants.VIDEO_QUALITY_HIGHEST:
+            case Constants.VIDEO_QUALITY_HIGHEST:
                 camcorderProfile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_HIGH);
                 break;
 
-            case CameraKit.Constants.VIDEO_QUALITY_LOWEST:
+            case Constants.VIDEO_QUALITY_LOWEST:
                 camcorderProfile = CamcorderProfile.get(mCameraId, CamcorderProfile.QUALITY_LOW);
                 break;
         }
@@ -764,5 +770,28 @@ public class Camera1 extends CameraImpl {
             return normalized;
         }
     }
-
+    /**
+     * @return {@code true} if {@link #mCameraParameters} was modified.
+     */
+    private boolean setFlashInternal(int flash) {
+        if (isCameraOpened()) {
+            List<String> modes = mCameraParameters.getSupportedFlashModes();
+            String mode = FLASH_MODES.get(flash);
+            if (modes != null && modes.contains(mode)) {
+                mCameraParameters.setFlashMode(mode);
+                mFlash = flash;
+                return true;
+            }
+            String currentMode = FLASH_MODES.get(mFlash);
+            if (modes == null || !modes.contains(currentMode)) {
+                mCameraParameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                mFlash = Constants.FLASH_OFF;
+                return true;
+            }
+            return false;
+        } else {
+            mFlash = flash;
+            return false;
+        }
+    }
 }
