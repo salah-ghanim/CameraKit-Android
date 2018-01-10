@@ -197,7 +197,7 @@ public class Camera1 extends CameraImpl {
                         mCameraParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
                     } else if (modes.contains(Camera.Parameters.FOCUS_MODE_INFINITY)) {
                         mCameraParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
-                    } else {
+                    } else if (modes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
                         mCameraParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
                     }
                 }
@@ -469,17 +469,19 @@ public class Camera1 extends CameraImpl {
                 getPreviewResolution().getWidth(),
                 getPreviewResolution().getHeight()
         );
-
-        mCameraParameters.setPictureSize(
-                getCaptureResolution().getWidth(),
-                getCaptureResolution().getHeight()
-        );
+        Size pictureSize = getSizeWithClosestRatio(sizesFromList(mCameraParameters.getSupportedPictureSizes()),
+                getCaptureResolution().getWidth(),  getCaptureResolution().getHeight());
+        if (pictureSize != null) {
+            mCameraParameters.setPictureSize(
+                    pictureSize.getWidth(),
+                    pictureSize.getHeight()
+            );
+        }
         int rotation = calculateCaptureRotation();
         mCameraParameters.setRotation(rotation);
 
         setFocus(mFocus);
         setFlash(mFlash);
-
         mCamera.setParameters(mCameraParameters);
     }
 
@@ -783,7 +785,7 @@ public class Camera1 extends CameraImpl {
                 return true;
             }
             String currentMode = FLASH_MODES.get(mFlash);
-            if (modes == null || !modes.contains(currentMode)) {
+            if (modes == null || !modes.contains(currentMode) && mode.contains(Camera.Parameters.FLASH_MODE_OFF)) {
                 mCameraParameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
                 mFlash = Constants.FLASH_OFF;
                 return true;
